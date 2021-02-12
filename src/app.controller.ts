@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -20,8 +20,25 @@ export class AppController {
     return [1,2,3];
   }
 
+  @Get('products/filter')
+  findAll(@Query() paginationQuery: any) {
+    const { limit, offset } = paginationQuery;
+    return `This action returns all products. Limit ${limit}, offset: ${offset}`;
+  }
+
+  @Get('products/:id')
+  getProduct(@Param('id') id: string) {
+    return id;
+  }
+  
+
   @Get('categories')
   getCategories(): number[] {
     return [4,5,6];
+  }
+
+  @Get('categories/:id')
+  getCategory(@Param('id') id: string) {
+    return id;
   }
 }
