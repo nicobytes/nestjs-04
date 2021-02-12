@@ -1,43 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 import { Product } from './../entities/product.entity';
 
 @Injectable()
 export class ProductsService {
 
-  private products: Product[] = [
-    {
-      id: 1,
-      name: 'Producto 1',
-      description: 'lorem lorem',
-      price: 10000,
-      stock: 0,
-      image: 'url'
-    },
-    {
-      id: 2,
-      name: 'Producto 2',
-      description: 'lorem lorem',
-      price: 20000,
-      stock: 0,
-      image: 'url'
-    },
-    {
-      id: 3,
-      name: 'Producto 3',
-      description: 'lorem lorem',
-      price: 20000,
-      stock: 0,
-      image: 'url'
-    },
-  ];
+  constructor(
+    @InjectRepository(Product) private productsRepo: Repository<Product>,
+  ) {}
 
   findAll() {
-    return this.products;
+    return this.productsRepo.find();
   }
 
   findOne(id: string) {
-    const product = this.products.find(item => item.id === +id);
+    const product = this.productsRepo.findOne(id);
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
     }
@@ -45,19 +24,18 @@ export class ProductsService {
   }
 
   create(data: any) {
-    this.products.push(data);
-    return data;
+    const newItem = this.productsRepo.create(data);
+    return this.productsRepo.save(newItem);
   }
 
-  update(id: string, changes: any) {
-    const product = this.findOne(id);
-    return product;
+  async update(id: string, changes: any) {
+    const item = await this.productsRepo.findOne(id);
+    this.productsRepo.merge(item, changes);
+    return this.productsRepo.save(item);
   }
 
-  remove(id: string) {
-    const productIndex = this.products.findIndex(item => item.id === +id);
-    if (productIndex >= 0) {
-      this.products.splice(productIndex, 1);
-    }
+  async remove(id: string) {
+    await this.productsRepo.delete(id);
+    return true;
   }
 }

@@ -1,29 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 import { Category } from '../entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
 
-  private categories: Category[] = [
-    {
-      id: 1,
-      name: 'Category 1',
-      image: 'url'
-    },
-    {
-      id: 2,
-      name: 'Category 2',
-      image: 'url'
-    },
-  ];
+  constructor(
+    @InjectRepository(Category) private categoryRepo: Repository<Category>,
+  ) {}
 
   findAll() {
-    return this.categories;
+    return this.categoryRepo.find();
   }
 
   findOne(id: string) {
-    const product = this.categories.find(item => item.id === +id);
+    const product = this.categoryRepo.findOne(id);
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
     }
@@ -31,19 +24,18 @@ export class CategoriesService {
   }
 
   create(data: any) {
-    this.categories.push(data);
-    return data;
+    const newItem = this.categoryRepo.create(data);
+    return this.categoryRepo.save(newItem);
   }
 
-  update(id: string, changes: any) {
-    const product = this.findOne(id);
-    return product;
+  async update(id: string, changes: any) {
+    const item = await this.categoryRepo.findOne(id);
+    this.categoryRepo.merge(item, changes);
+    return this.categoryRepo.save(item);
   }
 
-  remove(id: string) {
-    const productIndex = this.categories.findIndex(item => item.id === +id);
-    if (productIndex >= 0) {
-      this.categories.splice(productIndex, 1);
-    }
+  async remove(id: string) {
+    await this.categoryRepo.delete(id);
+    return true;
   }
 }
