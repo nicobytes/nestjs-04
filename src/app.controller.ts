@@ -14,4 +14,14 @@ export class AppController {
   getNewEndpoint(): string {
     return 'Soy un nuevo endpoint';
   }
+
+  @Get('products')
+  getProducts(): number[] {
+    return [1,2,3];
+  }
+
+  @Get('categories')
+  getCategories(): number[] {
+    return [4,5,6];
+  }
 }
